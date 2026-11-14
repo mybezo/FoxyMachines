@@ -160,10 +160,10 @@ public final class ForcefieldDome extends SlimefunItem implements EnergyNetCompo
 
     private void setDomeActive(@Nonnull Block b) {
         ArrayList<Block> domeBlocks = EmptySphereBlocks.get(b, 32);
+        OfflinePlayer owner = Bukkit.getOfflinePlayer(UUID.fromString(StorageCacheUtils.getData(b.getLocation(), "owner")));
 
         for (Block block : domeBlocks) {
-            UUID uuid = UUID.fromString(StorageCacheUtils.getData(b.getLocation(), "owner"));
-            if (Slimefun.getProtectionManager().hasPermission(Bukkit.getOfflinePlayer(uuid), block, Interaction.BREAK_BLOCK)) {
+            if (Slimefun.getProtectionManager().hasPermission(owner, block, Interaction.BREAK_BLOCK)) {
                 if (MATERIALS_TO_REPLACE.contains(block.getType())) {
                     block.setType(Material.BARRIER);
                 } else if (block.getType() != Material.BARRIER) {
@@ -176,10 +176,10 @@ public final class ForcefieldDome extends SlimefunItem implements EnergyNetCompo
 
     private void setDomeInactive(@Nonnull Block b) {
         ArrayList<Block> domeBlocks = EmptySphereBlocks.get(b, 32);
+        OfflinePlayer owner = Bukkit.getOfflinePlayer(UUID.fromString(StorageCacheUtils.getData(b.getLocation(), "owner")));
 
         for(Block block: domeBlocks) {
-            UUID uuid = UUID.fromString(StorageCacheUtils.getData(b.getLocation(), "owner"));
-            if (Slimefun.getProtectionManager().hasPermission(Bukkit.getOfflinePlayer(uuid), block, Interaction.BREAK_BLOCK)) {
+            if (Slimefun.getProtectionManager().hasPermission(owner, block, Interaction.BREAK_BLOCK)) {
                 if (block.getType() == Material.BARRIER) {
                     block.setType(Material.AIR);
                 } else {

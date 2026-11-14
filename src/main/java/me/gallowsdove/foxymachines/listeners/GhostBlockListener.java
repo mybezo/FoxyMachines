@@ -14,12 +14,12 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+
 
 public class GhostBlockListener implements Listener {
-    private final Map<UUID, Location> preExplosionLocations = new ConcurrentHashMap<>();
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     private void onHitByFishingRod(PlayerFishEvent e) {
         if (e.getCaught() instanceof FallingBlock b &&
@@ -30,10 +30,19 @@ public class GhostBlockListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     private void onEntityExplode(EntityExplodeEvent e) {
-        for (Entity ent : e.getLocation().getWorld().getNearbyEntities(e.getLocation(), 6, 6, 6)) {
-            if (ent instanceof FallingBlock b && GhostBlock.isGhostBlock(b)) {
-                preExplosionLocations.put(b.getUniqueId(), b.getLocation());
-            }
+        // Most servers have no ghost blocks loaded, skip the entity scan entirely
+        if (GhostBlock.BLOCK_CACHE.isEmpty()) {
+            return;
+        }
+
+        Map<UUID, Location> preExplosionLocations = new HashMap<>();
+        for (Entity ent : e.getLocation().getWorld().getNearbyEntities(e.getLocation(), 6, 6, 6,
+                ent -> ent instanceof FallingBlock && GhostBlock.BLOCK_CACHE.contains(ent.getUniqueId()))) {
+            preExplosionLocations.put(ent.getUniqueId(), ent.getLocation());
+        }
+
+        if (preExplosionLocations.isEmpty()) {
+            return;
         }
 
         Bukkit.getScheduler().runTaskLater(FoxyMachines.getInstance(), () -> {
@@ -44,7 +53,6 @@ public class GhostBlockListener implements Listener {
                     fb.setVelocity(new Vector(0, 0, 0));
                     fb.setGravity(false);
                 }
-                preExplosionLocations.remove(entry.getKey());
             }
         }, 1L);
     }
