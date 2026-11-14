@@ -105,13 +105,13 @@ public class UnbreakableRune extends SimpleSlimefunItem<ItemDropHandler> {
 
                         l.getWorld().dropItemNaturally(l, itemStack);
 
-                        p.sendMessage(ChatColor.LIGHT_PURPLE + "你的物品已经不可破坏了");
+                        p.sendMessage(ChatColor.LIGHT_PURPLE + "Your item is already unbreakable");
                     } else {
-                        p.sendMessage(ChatColor.LIGHT_PURPLE + "该物品无法变成不可破坏");
+                        p.sendMessage(ChatColor.LIGHT_PURPLE + "This item can't be made unbreakable");
                     }
                 });
             } else {
-                p.sendMessage(ChatColor.LIGHT_PURPLE + "该物品无法变成不可破坏");
+                p.sendMessage(ChatColor.LIGHT_PURPLE + "This item can't be made unbreakable");
             }
         }
     }
@@ -162,7 +162,7 @@ public class UnbreakableRune extends SimpleSlimefunItem<ItemDropHandler> {
         final String id = slimefunItem.getId();
         final String addon = slimefunItem.getAddon().getName();
         if (BLACKLIST.containsKey(addon) && BLACKLIST.get(addon).contains(id)) {
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "该物品无法变成不可破坏");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "This item can't be made unbreakable");
             return true;
         }
         return false;

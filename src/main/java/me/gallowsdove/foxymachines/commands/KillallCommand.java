@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public class KillallCommand extends SubCommand {
     public KillallCommand() {
-        super("killall", "击杀当前世界中由 FoxyMachines 召唤的所有自定义生物", "foxymachines.admin");
+        super("killall", "Kill all custom mobs spawned by FoxyMachines in the current world", "foxymachines.admin");
     }
 
     @Override
@@ -27,7 +27,7 @@ public class KillallCommand extends SubCommand {
         }
 
         if (args.length != 0) {
-            sender.sendMessage(ChatColor.LIGHT_PURPLE + "使用方法: /foxy killall");
+            sender.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /foxy killall");
             return;
         }
 
@@ -44,7 +44,7 @@ public class KillallCommand extends SubCommand {
 
         CustomBoss.removeBossBars();
 
-        player.sendMessage("已移除 %s 个实体".formatted(count));
+        player.sendMessage("Removed %s entities".formatted(count));
     }
 
     @Override

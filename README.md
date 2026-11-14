@@ -1,65 +1,75 @@
-# FoxyMachines 神秘科技
+# FoxyMachines
 
-FoxyMachines 向 [Slimefun](https://github.com/Slimefun/Slimefun4) 添加了许多的机器与工具。本附属由 GallowsDove 热情制作。
+FoxyMachines adds many machines and tools to [Slimefun](https://github.com/Slimefun/Slimefun4). This addon was passionately made by GallowsDove.
 
-**本附属需要 Java 16 才能运行!**
+**This addon requires Java 16 to run!**
 
-**你可以在 items.yml 中禁用任何你不想要的物品**
+**You can disable any item you don't want in items.yml**
 
-汉化作者推荐: 配合 [MobCapturer](https://github.com/ybw0014/MobCapturer) 可轻松将生物捕捉至献祭祭坛。
+Tip: use [MobCapturer](https://github.com/ybw0014/MobCapturer) to easily bring mobs to the Sacrificial Altar.
 
-## 下载
+## Download
 
-[下载 FoxyMachines](https://resources.guizhanss.com/plugin/FoxyMachines)
+[Download FoxyMachines](https://resources.guizhanss.com/plugin/FoxyMachines)
 
-## 首领 (Boss)
+## Configuration
 
-* 精灵女王
-* 无头骑士
+Some features are disabled by default and can be enabled in `config.yml`:
 
-## 其他怪物
+| Option | Default | Description |
+| --- | --- | --- |
+| `ghost-blocks` | `false` | Ghost Blocks and the Ghost Block Remover |
+| `chunk-loaders` | `false` | Chunk Loader |
+| `forcefield-dome` | `false` | Forcefield Dome and Remote Controller |
 
-* 精灵
-* 地狱犬
+## Bosses
 
-## 工具
+* Pixie Queen
+* Headless Horseman
 
-* 电力元素法杖 - 风
-* 电力元素法杖 - 火
-* 电力元素法杖 - 火 - II
-* 甜浆果丛修剪器
-* 波塞冬的钓竿
-* 远程控制器
-* 幽灵方块移除器
-* 位置选择器
-* 填充棒
-* 海绵棒
+## Other Mobs
 
-## 武器
+* Pixie
+* Helldog
 
-* 治愈之弓
-* 诅咒之剑
-* 天界之剑
-* 阐释者
-* 锋利之弓
+## Tools
 
-## 防具
+* Electric Elemental Staff - Wind
+* Electric Elemental Staff - Fire
+* Electric Elemental Staff - Fire - II
+* Berry Bush Trimmer
+* Poseidon's Fishing Rod
+* Remote Controller
+* Ghost Block Remover
+* Position Selector
+* Fill Wand
+* Sponge Wand
 
-* 水灵头盔
-* 抗性胸甲
-* 火焰护腿
-* 轻盈之靴
+## Weapons
 
-## 机器
+* Healing Bow
+* Cursed Sword
+* Celestial Sword
+* Elucidator
+* Acri Arcum
 
-* 改进锻造台
-* 药水混合器
-* 电力炼金厂
-* 区块加载器
-* 提速铁轨
-* 穹顶力场
+## Armor
 
-## 其他
+* Aquatic Helmet
+* Resistant Chestplate
+* Fiery Leggings
+* Light Boots
 
-* 献祭祭坛
-* 幽灵方块
+## Machines
+
+* Improvement Forge
+* Potion Mixer
+* Electric Gold Refinery
+* Chunk Loader
+* Boosted Rails
+* Forcefield Dome
+
+## Other
+
+* Sacrificial Altar
+* Ghost Blocks

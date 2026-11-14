@@ -10,7 +10,7 @@ import java.util.List;
 
 public class SacrificialAltarCommand extends SubCommand {
     public SacrificialAltarCommand() {
-        super("altar", "查看如何建造献祭祭坛", "foxymachines.info");
+        super("altar", "Shows how to build a Sacrificial Altar", "foxymachines.info");
     }
 
     @Override

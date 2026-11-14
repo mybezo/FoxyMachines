@@ -3,7 +3,7 @@ package me.gallowsdove.foxymachines.utils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import me.gallowsdove.foxymachines.FoxyMachines;
 import me.gallowsdove.foxymachines.Items;
-import net.guizhanss.guizhanlib.minecraft.helper.entity.EntityTypeHelper;
+import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
@@ -25,30 +25,30 @@ public class QuestUtils {
 
     private static final List<EntityType> QUEST_MOBS = new ArrayList<>();
     private static final List<String> CURSED_LINES = List.of(
-            "我很想杀一个{entity}，真的很美味!",
-            "马上！我要{entity}！",
-            "你一定能帮我杀一个{entity}。",
-            "我渴望鲜血....  {entity}的鲜血。",
-            "我需要{entity}的肝脏!",
-            "我听说{entity}的血液很鲜美...",
-            "{entity}的心脏，hmmm...",
-            "我会因为{entity}肉而杀了上帝。",
-            "我可能会食用{entity}一整天。",
-            "我等待这一天很久了，是时候去击杀一个{entity}了。",
-            "{entity}血流成河！",
-            "我的诅咒将吞噬", "的灵魂!");
+            "I would really like to kill a {entity}, they are so tasty!",
+            "Now! I want a {entity}!",
+            "You can surely help me kill a {entity}.",
+            "I crave blood... the blood of a {entity}.",
+            "I need the liver of a {entity}!",
+            "I heard {entity} blood is delicious...",
+            "The heart of a {entity}, hmmm...",
+            "I would kill God for some {entity} meat.",
+            "I could eat {entity} all day long.",
+            "I have waited for this day for so long, it's time to kill a {entity}.",
+            "Rivers of {entity} blood!",
+            "My curse shall devour the soul of a {entity}!");
     private static final List<String> CELESTIAL_LINES = List.of(
-            "我热爱所有生命，除了{entity}，我讨厌它们!",
-            "所有必须平衡，这就是为什么我需要击杀一个{entity}。",
-            "我来自天界，但我也是一把剑。现在，给我一个{entity}。",
-            "抱歉，但现在请给我一个{entity}。不要质疑我！",
-            "天界之剑需要获得献祭，{entity}！",
-            "下一位受害者是{entity}，如上帝所愿。",
-            "接下来是... {entity}！",
-            "上帝想要{entity}死。",
-            "为了上帝和荣耀，去杀死一只{entity}。",
-            "去吧，为了正义! 杀死一只{entity}！",
-            "众星云集，我可以看到{entity}将被我的剑刃杀死。");
+            "I love all life, except {entity}, I hate them!",
+            "All must be balanced, that's why I need to kill a {entity}.",
+            "I am celestial, but I am also a sword. Now, give me a {entity}.",
+            "Sorry, but give me a {entity} now. Don't question me!",
+            "The Celestial Sword demands a sacrifice: {entity}!",
+            "The next victim is a {entity}, as God wills.",
+            "Next up is... {entity}!",
+            "God wants a {entity} dead.",
+            "For God and glory, go kill a {entity}.",
+            "Go, for justice! Kill a {entity}!",
+            "The stars have aligned, I can see a {entity} dying by my blade.");
 
 
     public static void init() {
@@ -61,7 +61,7 @@ public class QuestUtils {
             try {
                 QuestUtils.QUEST_MOBS.add(EntityType.valueOf(questMob));
             } catch (IllegalArgumentException ignored) {
-                FoxyMachines.log(Level.WARNING, "\"quest-mobs\" 包含无效的生物类型：" + questMob);
+                FoxyMachines.log(Level.WARNING, "\"quest-mobs\" contains an invalid entity type: " + questMob);
             }
         }
     }
@@ -135,6 +135,6 @@ public class QuestUtils {
             id = nextQuestLine(p);
         }
 
-        return EntityTypeHelper.getName(QUEST_MOBS.get(id));
+        return ChatUtils.humanize(QUEST_MOBS.get(id).name());
     }
 }

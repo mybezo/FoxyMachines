@@ -53,8 +53,8 @@ public class FoxyMachines extends AbstractAddon {
         instance = this;
 
         if (!getServer().getPluginManager().isPluginEnabled("GuizhanLibPlugin")) {
-            getLogger().log(Level.SEVERE, "本插件需要 鬼斩前置库插件(GuizhanLibPlugin) 才能运行!");
-            getLogger().log(Level.SEVERE, "从此处下载: https://50L.cc/gzlib");
+            getLogger().log(Level.SEVERE, "This plugin requires GuizhanLibPlugin to run!");
+            getLogger().log(Level.SEVERE, "Download it here: https://50L.cc/gzlib");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -64,12 +64,16 @@ public class FoxyMachines extends AbstractAddon {
         }
 
         Events.registerListener(new ChunkLoadListener());
-        Events.registerListener(new ChunkLoaderListener());
+        if (getConfig().getBoolean("chunk-loaders")) {
+            Events.registerListener(new ChunkLoaderListener());
+        }
         Events.registerListener(new BoostedRailListener());
         Events.registerListener(new BerryBushListener());
-        Events.registerListener(new ForcefieldListener());
+        if (getConfig().getBoolean("forcefield-dome")) {
+            Events.registerListener(new ForcefieldListener());
+            Events.registerListener(new RemoteControllerListener());
+        }
         Events.registerListener(new GhostBlockListener());
-        Events.registerListener(new RemoteControllerListener());
         Events.registerListener(new SacrificialAltarListener());
         Events.registerListener(new SwordListener());
         Events.registerListener(new PoseidonsFishingRodListener());
@@ -85,8 +89,10 @@ public class FoxyMachines extends AbstractAddon {
 
         this.folderPath = getDataFolder().getAbsolutePath() + File.separator + "data-storage" + File.separator;
         BerryBushTrimmer.loadTrimmedBlocks();
-        ForcefieldDome.loadDomeLocations();
-        Scheduler.run(() -> ForcefieldDome.INSTANCE.setupDomes());
+        if (getConfig().getBoolean("forcefield-dome")) {
+            ForcefieldDome.loadDomeLocations();
+            Scheduler.run(() -> ForcefieldDome.INSTANCE.setupDomes());
+        }
         Scheduler.repeat(240, 10, new QuestTicker());
         Scheduler.repeat(100, new GhostBlockTask());
         if (getConfig().getBoolean("custom-mobs")) {
@@ -103,7 +109,9 @@ public class FoxyMachines extends AbstractAddon {
     @Override
     public void disable() {
         BerryBushTrimmer.saveTrimmedBlocks();
-        ForcefieldDome.saveDomeLocations();
+        if (getConfig().getBoolean("forcefield-dome")) {
+            ForcefieldDome.saveDomeLocations();
+        }
         if (getConfig().getBoolean("custom-mobs")) {
             CustomBoss.removeBossBars();
         }
