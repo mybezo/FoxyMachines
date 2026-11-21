@@ -49,6 +49,28 @@ Other options:
 
 > Upgrading from an older version? Your existing `config.yml` keeps `ghost-blocks: true`. The new `chunk-loaders` and `forcefield-dome` options start as `false`.
 
+### Compressed machines
+
+A compressed machine combines several machines into one. They are configured in `plugins/FoxyMachines/compressed.yml`:
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `enabled` | `true` | All compressed machines |
+| `multipliers.x8` … `multipliers.x64` | `true` | Each multiplier. Disabling one also disables the ones above it |
+| `machines.ELECTRIC_GOLD_REFINERY` | `true` | Compressed Electric Gold Refinery |
+
+| Multiplier | ID | Recipe (Compressor) |
+| --- | --- | --- |
+| x8 | `ELECTRIC_GOLD_REFINERY_X8` | 8 Electric Gold Refinery |
+| x16 | `ELECTRIC_GOLD_REFINERY_X16` | 2 of the x8 |
+| x32 | `ELECTRIC_GOLD_REFINERY_X32` | 2 of the x16 |
+| x64 | `ELECTRIC_GOLD_REFINERY_X64` | 2 of the x32 |
+
+- Each operation refines up to *multiplier* ingots at the normal speed, limited by the gold dust in both input slots and by the free output space.
+- Energy use and energy capacity are multiplied, but an operation only uses energy for the ingots it refines.
+- Only the highest enabled multiplier is listed in the guide under **Foxy Machines > Compressed Items**. The lower ones are still craftable.
+- Changes require a server restart. Missing options are added to the file automatically.
+
 ## Commands
 
 The main command is `/foxymachines`, with aliases `/fm` and `/foxy`.
@@ -72,7 +94,7 @@ The main command is `/foxymachines`, with aliases `/fm` and `/foxy`.
 ### Machines
 - Improvement Forge: upgrades the tier of Slimefun tools, weapons and armor
 - Potion Mixer
-- Electric Gold Refinery
+- Electric Gold Refinery, with compressed versions (x8 to x64)
 - Chunk Loader *(disabled by default)*
 - Boosted Rails: 2.5x minecart speed
 - Forcefield Dome: barrier with a 32 block radius *(disabled by default)*

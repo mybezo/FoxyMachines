@@ -342,6 +342,7 @@ final class ItemSetup {
         new ImprovementForge().register(FoxyMachines.getInstance());
         new PotionMixer().register(FoxyMachines.getInstance());
         new ElectricGoldRefinery().register(FoxyMachines.getInstance());
+        CompressedSetup.setup();
         if (chunkLoaders) {
             new ChunkLoader().register(FoxyMachines.getInstance());
         }
@@ -465,6 +466,7 @@ final class ResearchSetup {
         new Research(new NamespacedKey(FoxyMachines.getInstance(), "electric_gold_refinery"),
                 6669673, "No More Smeltery", 28)
                 .addItems(Items.ELECTRIC_GOLD_REFINERY)
+                .addItems(CompressedSetup.ELECTRIC_GOLD_REFINERY.toArray(new ItemStack[0]))
                 .register();
         if (chunkLoaders) {
             new Research(new NamespacedKey(FoxyMachines.getInstance(), "chunk_loader"),

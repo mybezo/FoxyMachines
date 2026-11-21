@@ -1,6 +1,7 @@
 package me.gallowsdove.foxymachines;
 
 import io.github.mooy1.infinitylib.machines.MachineLore;
+import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.items.groups.NestedItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.groups.SubItemGroup;
@@ -9,6 +10,7 @@ import io.github.thebusybiscuit.slimefun4.core.attributes.MachineType;
 import io.github.thebusybiscuit.slimefun4.core.attributes.Radioactivity;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.utils.LoreBuilder;
+import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.github.thebusybiscuit.slimefun4.utils.itemstack.ColoredFireworkStar;
 import me.gallowsdove.foxymachines.implementation.machines.ElectricGoldRefinery;
 import me.gallowsdove.foxymachines.implementation.machines.ForcefieldDome;
@@ -18,8 +20,11 @@ import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import javax.annotation.Nonnull;
 
 public final class Items{
 
@@ -70,6 +75,29 @@ public final class Items{
             MAIN_ITEM_GROUP,
             new CustomItemStack(Material.GLASS, "&5Ghost Blocks")
     );
+
+    // the head texture of the "Compressed Items" icon (Mybezo's skin)
+    private static final String COMPRESSED_ITEMS_TEXTURE = "82600941fab88efc41bb132d873d3b5c5f35f7720ebd9375476c1a18955bb03e";
+
+    public static final SubItemGroup COMPRESSED_ITEM_GROUP = new SubItemGroup(
+            new NamespacedKey(FoxyMachines.getInstance(), "compressed_items"),
+            MAIN_ITEM_GROUP,
+            new CustomItemStack(SlimefunUtils.getCustomHead(COMPRESSED_ITEMS_TEXTURE), "&aCompressed Items",
+                    "", "&7Multiple machines combined into one")
+    );
+
+    /**
+     * The lower multipliers of the compressed machines, craftable but not listed in the guide.
+     */
+    public static final ItemGroup HIDDEN_ITEM_GROUP = new ItemGroup(
+            new NamespacedKey(FoxyMachines.getInstance(), "compressed_hidden"),
+            new CustomItemStack(Material.BARRIER, "&7Hidden")
+    ) {
+        @Override
+        public boolean isVisible(@Nonnull Player p) {
+            return false;
+        }
+    };
 
     // Items
     public static final SlimefunItemStack ELECTRIC_WIND_STAFF = new SlimefunItemStack(

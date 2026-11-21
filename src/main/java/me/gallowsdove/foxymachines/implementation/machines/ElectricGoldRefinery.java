@@ -1,10 +1,12 @@
 package me.gallowsdove.foxymachines.implementation.machines;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
+import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.attributes.EnergyNetComponent;
+import io.github.thebusybiscuit.slimefun4.core.attributes.RecipeDisplayItem;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.core.networks.energy.EnergyNetComponentType;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
@@ -12,9 +14,11 @@ import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
+import io.github.thebusybiscuit.slimefun4.utils.InvUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import me.gallowsdove.foxymachines.FoxyMachines;
 import me.gallowsdove.foxymachines.Items;
+import me.gallowsdove.foxymachines.utils.Compressible;
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.AdvancedMenuClickHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
@@ -39,7 +43,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 
-public class ElectricGoldRefinery extends SlimefunItem implements EnergyNetComponent {
+public class ElectricGoldRefinery extends SlimefunItem implements EnergyNetComponent, Compressible, RecipeDisplayItem {
     private static final int[] BORDER = { 2, 3, 4, 5, 6, 7, 8, 14, 23, 32, 41, 47, 48, 49, 50, 51, 52, 53 };
     private static final int[] BORDER_IN = { 11, 12, 13, 20, 22, 29, 31, 38 , 39, 40 };
     private static final int[] BORDER_OUT = { 15, 16, 17, 24, 26, 33, 35, 42, 43, 44 };
@@ -50,16 +54,31 @@ public class ElectricGoldRefinery extends SlimefunItem implements EnergyNetCompo
 
     public static Map<Block, MachineRecipe> processing = new HashMap<>();
     public static Map<Block, Integer> progress = new HashMap<>();
+    // the amount of refinings in the current operation (1 for the normal machine)
+    public static Map<Block, Integer> units = new HashMap<>();
+
+    private final int multiplier;
 
     public ElectricGoldRefinery() {
-        super(Items.MACHINES_ITEM_GROUP, Items.ELECTRIC_GOLD_REFINERY, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+        this(Items.MACHINES_ITEM_GROUP, Items.ELECTRIC_GOLD_REFINERY, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
                 SlimefunItems.HARDENED_METAL_INGOT, SlimefunItems.ELECTRIC_MOTOR, SlimefunItems.HARDENED_METAL_INGOT,
                 SlimefunItems.HEATING_COIL, SlimefunItems.ELECTRIC_SMELTERY, SlimefunItems.HEATING_COIL,
                 SlimefunItems.HARDENED_METAL_INGOT, SlimefunItems.MEDIUM_CAPACITOR, SlimefunItems.HARDENED_METAL_INGOT
-        });
+        }, 1);
+    }
 
+    /**
+     * @param multiplier the amount of machines combined into this one (1 for the normal machine).
+     *                   Every operation refines up to this many ingots at the same speed.
+     */
+    public ElectricGoldRefinery(@Nonnull ItemGroup itemGroup, @Nonnull SlimefunItemStack item, @Nonnull RecipeType recipeType,
+                                @Nonnull ItemStack[] recipe, int multiplier) {
+        super(itemGroup, item, recipeType, recipe);
+        this.multiplier = Math.max(1, multiplier);
 
-        new BlockMenuPreset(getId(), "&6Electric Gold Refinery") {
+        String title = this.multiplier > 1 ? "&6Electric Gold Refinery &a(" + this.multiplier + ")" : "&6Electric Gold Refinery";
+
+        new BlockMenuPreset(getId(), title) {
 
             @Override
             public void init() {
@@ -163,11 +182,30 @@ public class ElectricGoldRefinery extends SlimefunItem implements EnergyNetCompo
 
     @Override
     public int getCapacity() {
-        return CAPACITY;
+        return Compressible.scale(CAPACITY, multiplier, Integer.MAX_VALUE);
     }
 
+    /**
+     * The energy per tick of one refining, the energy of an operation is this multiplied by its units.
+     */
     public int getEnergyConsumption() {
         return ENERGY_CONSUMPTION;
+    }
+
+    @Override
+    public int getMultiplier() {
+        return multiplier;
+    }
+
+    @Nonnull
+    @Override
+    public List<ItemStack> getDisplayRecipes() {
+        if (multiplier <= 1) {
+            return new ArrayList<>();
+        }
+        List<ItemStack> list = new ArrayList<>();
+        list.add(Compressible.multiplierInfo(multiplier));
+        return list;
     }
 
     public ItemStack getProgressBar() {
@@ -193,6 +231,10 @@ public class ElectricGoldRefinery extends SlimefunItem implements EnergyNetCompo
                     inv.dropItems(b.getLocation(), getOutputSlots());
                     inv.dropItems(b.getLocation(), getInputSlots());
                 }
+
+                processing.remove(b);
+                progress.remove(b);
+                units.remove(b);
             }
         };
     }
@@ -223,11 +265,13 @@ public class ElectricGoldRefinery extends SlimefunItem implements EnergyNetCompo
                 ChestMenuUtils.updateProgressbar(inv, 23, timeleft, processing.get(b).getTicks(), getProgressBar());
 
                 if (isChargeable()) {
-                    if (getCharge(b.getLocation()) < getEnergyConsumption()) {
+                    // only the refinings in this operation use energy
+                    int energy = Compressible.scale(getEnergyConsumption(), units.getOrDefault(b, 1), Integer.MAX_VALUE);
+                    if (getCharge(b.getLocation()) < energy) {
                         return;
                     }
 
-                    removeCharge(b.getLocation(), getEnergyConsumption());
+                    removeCharge(b.getLocation(), energy);
                 }
                 progress.put(b, timeleft - 1);
             }
@@ -240,6 +284,7 @@ public class ElectricGoldRefinery extends SlimefunItem implements EnergyNetCompo
 
                 progress.remove(b);
                 processing.remove(b);
+                units.remove(b);
             }
         }
         else {
@@ -248,6 +293,12 @@ public class ElectricGoldRefinery extends SlimefunItem implements EnergyNetCompo
             if (next != null) {
                 processing.put(b, next);
                 progress.put(b, next.getTicks());
+                // the output holds one ingot per refining
+                int amount = 0;
+                for (ItemStack output : next.getOutput()) {
+                    amount += output.getAmount();
+                }
+                units.put(b, Math.max(1, amount));
             }
         }
     }
@@ -281,31 +332,42 @@ public class ElectricGoldRefinery extends SlimefunItem implements EnergyNetCompo
 
 
 
-        int goldCost = goldTier + 1;
-        if (goldDusts >= goldCost) {
-
+        int costPerIngot = goldTier + 1;
+        // refine as many ingots as the gold dust allows, up to the multiplier
+        int amount = Math.min(multiplier, goldDusts / costPerIngot);
+        if (amount > 0) {
             ItemStack output = GOLDS[goldTier];
-            if (!menu.fits(output, getOutputSlots())) {
+
+            // only refine what fits in the output, so nothing is lost
+            while (amount > 0 && !fits(menu, output, amount)) {
+                amount--;
+            }
+            if (amount == 0) {
                 return null;
             }
 
-            for (int i = 0; i < goldDustList.size(); i++)
-            {
-                if (goldDustList.get(i).getAmount() == 0) {
+            // the gold dust can come from both input slots
+            int goldCost = costPerIngot * amount;
+            for (int i = 0; i < goldDustList.size() && goldCost > 0; i++) {
+                int available = goldDustList.get(i).getAmount();
+                if (available == 0) {
                     continue;
-                } else if (goldDustList.get(i).getAmount() >= goldCost) {
-                    menu.consumeItem(inputSlots[i], goldCost);
-                    break;
-                } else {
-                    menu.consumeItem(inputSlots[i], goldDustList.get(i).getAmount());
-                    goldCost = goldCost - goldDustList.get(i).getAmount();
                 }
+                int consumed = Math.min(available, goldCost);
+                menu.consumeItem(inputSlots[i], consumed);
+                goldCost -= consumed;
             }
 
-            return new MachineRecipe ((int) (3 + 0.5*goldTier), new ItemStack[] { new SlimefunItemStack(SlimefunItems.GOLD_DUST, goldTier) }, new ItemStack[] { output });
+            return new MachineRecipe((int) (3 + 0.5*goldTier), new ItemStack[] { new SlimefunItemStack(SlimefunItems.GOLD_DUST, goldTier) },
+                    Compressible.toStacks(output, amount));
         }
 
         return null;
+    }
+
+    private boolean fits(@Nonnull BlockMenu menu, @Nonnull ItemStack output, int amount) {
+        // checks all the stacks together, an output above the stack size is split into several stacks
+        return InvUtils.fitAll(menu.toInventory(), Compressible.toStacks(output, amount), getOutputSlots());
     }
 
     protected void constructMenu(@Nonnull BlockMenuPreset preset) {
