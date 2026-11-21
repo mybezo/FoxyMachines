@@ -12,9 +12,9 @@ import io.github.thebusybiscuit.slimefun4.core.networks.energy.EnergyNetComponen
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.items.ItemUtils;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
-import io.github.thebusybiscuit.slimefun4.utils.InvUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import me.gallowsdove.foxymachines.FoxyMachines;
 import me.gallowsdove.foxymachines.Items;
@@ -339,10 +339,8 @@ public class ElectricGoldRefinery extends SlimefunItem implements EnergyNetCompo
             ItemStack output = GOLDS[goldTier];
 
             // only refine what fits in the output, so nothing is lost
-            while (amount > 0 && !fits(menu, output, amount)) {
-                amount--;
-            }
-            if (amount == 0) {
+            amount = Math.min(amount, getFreeSpace(menu, output));
+            if (amount <= 0) {
                 return null;
             }
 
@@ -365,9 +363,21 @@ public class ElectricGoldRefinery extends SlimefunItem implements EnergyNetCompo
         return null;
     }
 
-    private boolean fits(@Nonnull BlockMenu menu, @Nonnull ItemStack output, int amount) {
-        // checks all the stacks together, an output above the stack size is split into several stacks
-        return InvUtils.fitAll(menu.toInventory(), Compressible.toStacks(output, amount), getOutputSlots());
+    /**
+     * How many of the item fit in the output slots, over all the slots together.
+     */
+    private int getFreeSpace(@Nonnull BlockMenu menu, @Nonnull ItemStack output) {
+        int maxStack = output.getMaxStackSize();
+        int free = 0;
+        for (int slot : getOutputSlots()) {
+            ItemStack stack = menu.getItemInSlot(slot);
+            if (stack == null || stack.getType().isAir()) {
+                free += maxStack;
+            } else if (ItemUtils.canStack(stack, output)) {
+                free += Math.max(0, maxStack - stack.getAmount());
+            }
+        }
+        return free;
     }
 
     protected void constructMenu(@Nonnull BlockMenuPreset preset) {
