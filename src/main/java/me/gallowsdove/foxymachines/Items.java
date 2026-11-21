@@ -3,7 +3,6 @@ package me.gallowsdove.foxymachines;
 import io.github.mooy1.infinitylib.machines.MachineLore;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
-import io.github.thebusybiscuit.slimefun4.api.items.groups.NestedItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.groups.SubItemGroup;
 import io.github.thebusybiscuit.slimefun4.core.attributes.MachineTier;
 import io.github.thebusybiscuit.slimefun4.core.attributes.MachineType;
@@ -16,10 +15,13 @@ import me.gallowsdove.foxymachines.implementation.machines.ElectricGoldRefinery;
 import me.gallowsdove.foxymachines.implementation.machines.ForcefieldDome;
 import me.gallowsdove.foxymachines.implementation.machines.ImprovementForge;
 import me.gallowsdove.foxymachines.implementation.machines.PotionMixer;
+import me.gallowsdove.foxymachines.utils.FoxyMainGroup;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
+import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
+import io.github.thebusybiscuit.slimefun4.core.guide.SlimefunGuideMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -29,7 +31,7 @@ import javax.annotation.Nonnull;
 public final class Items{
 
     // Item groups
-    public static final NestedItemGroup MAIN_ITEM_GROUP = new NestedItemGroup(
+    public static final FoxyMainGroup MAIN_ITEM_GROUP = new FoxyMainGroup(
             new NamespacedKey(FoxyMachines.getInstance(), "foxy_machines"),
             new CustomItemStack(Material.SHEARS, "&4Foxy Machines")
     );
@@ -79,11 +81,31 @@ public final class Items{
     // the head texture of the "Compressed Items" icon (Mybezo's skin)
     private static final String COMPRESSED_ITEMS_TEXTURE = "82600941fab88efc41bb132d873d3b5c5f35f7720ebd9375476c1a18955bb03e";
 
-    public static final SubItemGroup COMPRESSED_ITEM_GROUP = new SubItemGroup(
+    /**
+     * The slot of the "Compressed Items" button in the Foxy Machines menu.
+     */
+    public static final int COMPRESSED_ITEMS_SLOT = 40;
+
+    /**
+     * The "Compressed Items" menu, only opened from its button in the Foxy Machines menu.
+     */
+    public static final FoxyMainGroup COMPRESSED_ITEMS_GROUP = new FoxyMainGroup(
             new NamespacedKey(FoxyMachines.getInstance(), "compressed_items"),
-            MAIN_ITEM_GROUP,
             new CustomItemStack(SlimefunUtils.getCustomHead(COMPRESSED_ITEMS_TEXTURE), "&aCompressed Items",
                     "", "&7Multiple machines combined into one")
+    ) {
+        @Override
+        public boolean isVisible(@Nonnull Player p, @Nonnull PlayerProfile profile, @Nonnull SlimefunGuideMode mode) {
+            // not listed in the main Slimefun guide
+            return false;
+        }
+    };
+
+    // same icon as the original Machines group
+    public static final SubItemGroup COMPRESSED_MACHINES_ITEM_GROUP = new SubItemGroup(
+            new NamespacedKey(FoxyMachines.getInstance(), "compressed_machines"),
+            COMPRESSED_ITEMS_GROUP,
+            new CustomItemStack(Material.BEACON, "&aMachines")
     );
 
     /**

@@ -9,7 +9,7 @@
 #   x32 = 2 of the x16 machine
 #   x64 = 2 of the x32 machine
 #
-# Only the highest enabled multiplier is listed in the guide (Foxy Machines > Compressed Items),
+# Only the highest enabled multiplier is listed in the guide (Foxy Machines > Compressed Items > Machines),
 # the lower multipliers are still craftable.
 #
 # Changes require a server restart.

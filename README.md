@@ -68,7 +68,7 @@ A compressed machine combines several machines into one. They are configured in 
 
 - Each operation refines up to *multiplier* ingots at the normal speed, limited by the gold dust in both input slots and by the free output space.
 - Energy use and energy capacity are multiplied, but an operation only uses energy for the ingots it refines.
-- Only the highest enabled multiplier is listed in the guide under **Foxy Machines > Compressed Items**. The lower ones are still craftable.
+- Only the highest enabled multiplier is listed in the guide under **Foxy Machines > Compressed Items** (the button at the bottom of the menu) **> Machines**. The lower ones are still craftable.
 - Changes require a server restart. Missing options are added to the file automatically.
 
 ## Commands
@@ -94,7 +94,7 @@ The main command is `/foxymachines`, with aliases `/fm` and `/foxy`.
 ### Machines
 - Improvement Forge: upgrades the tier of Slimefun tools, weapons and armor
 - Potion Mixer
-- Electric Gold Refinery, with compressed versions (x8 to x64)
+- Electric Gold Refinery: pick the gold carat in the top row (arrows switch pages), 14 input slots and 7 output slots. Has compressed versions (x8 to x64)
 - Chunk Loader *(disabled by default)*
 - Boosted Rails: 2.5x minecart speed
 - Forcefield Dome: barrier with a 32 block radius *(disabled by default)*

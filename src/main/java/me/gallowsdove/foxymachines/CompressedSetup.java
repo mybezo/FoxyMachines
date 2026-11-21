@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  *
  * <p>Every machine has a compressed version for each multiplier (x8, x16, x32, x64). The first one is made of
  * 8 original machines in the Compressor, the others of 2 of the previous multiplier. Only the highest enabled
- * multiplier is listed in the guide, the lower ones are still craftable.</p>
+ * multiplier is listed in the guide (Foxy Machines > Compressed Items > Machines), the lower ones are still craftable.</p>
  */
 final class CompressedSetup {
     static final int[] MULTIPLIERS = { 8, 16, 32, 64 };
@@ -99,9 +99,9 @@ final class CompressedSetup {
             }
         }
 
-        if (count == 0) {
-            Items.MAIN_ITEM_GROUP.removeSubGroup(Items.COMPRESSED_ITEM_GROUP);
-        } else {
+        if (count > 0) {
+            // Foxy Machines > Compressed Items (slot 40) > Machines
+            Items.MAIN_ITEM_GROUP.setFixedGroup(Items.COMPRESSED_ITEMS_SLOT, Items.COMPRESSED_ITEMS_GROUP);
             FoxyMachines.log(Level.INFO, "Registered " + count + " compressed machines.");
         }
     }
@@ -119,7 +119,7 @@ final class CompressedSetup {
             ItemStack[] recipe = { ingredient, null, null, null, null, null, null, null, null };
 
             // only the highest multiplier is listed in the guide
-            ItemGroup group = multiplier == highest ? Items.COMPRESSED_ITEM_GROUP : Items.HIDDEN_ITEM_GROUP;
+            ItemGroup group = multiplier == highest ? Items.COMPRESSED_MACHINES_ITEM_GROUP : Items.HIDDEN_ITEM_GROUP;
             SlimefunItem item = entry.factory().apply(new Args(group, stack, recipe, multiplier), baseItem);
             item.register(FoxyMachines.getInstance());
             entry.registered().add(stack);
