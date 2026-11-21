@@ -94,7 +94,7 @@ The main command is `/foxymachines`, with aliases `/fm` and `/foxy`.
 ### Machines
 - Improvement Forge: upgrades the tier of Slimefun tools, weapons and armor
 - Potion Mixer
-- Electric Gold Refinery: pick the gold carat in the top row (arrows switch pages), 14 input slots and 7 output slots. Has compressed versions (x8 to x64)
+- Electric Gold Refinery: click the recipe button at the top to switch the gold carat (left click = next, right click = previous), 14 input slots and 7 output slots. Has compressed versions (x8 to x64)
 - Chunk Loader *(disabled by default)*
 - Boosted Rails: 2.5x minecart speed
 - Forcefield Dome: barrier with a 32 block radius *(disabled by default)*

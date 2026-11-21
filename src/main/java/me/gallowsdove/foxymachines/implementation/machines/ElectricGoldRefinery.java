@@ -28,18 +28,12 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.inventory.DirtyChestMenu;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -47,10 +41,9 @@ import java.util.*;
 
 
 public class ElectricGoldRefinery extends SlimefunItem implements EnergyNetComponent, Compressible, RecipeDisplayItem {
-    // layout: row 1 = recipe selection with page arrows, rows 3-4 = input, row 6 = output
-    private static final int PREVIOUS_PAGE_SLOT = 0;
-    private static final int NEXT_PAGE_SLOT = 8;
-    private static final int[] SELECTION_SLOTS = { 1, 2, 3, 4, 5, 6, 7 };
+    // layout: row 1 = recipe button (slot 4), rows 3-4 = input, row 6 = output
+    private static final int RECIPE_SLOT = 4;
+    private static final int[] BACKGROUND = { 0, 1, 2, 3, 5, 6, 7, 8 };
     private static final int[] BORDER_IN = { 9, 10, 11, 12, 14, 15, 16, 17, 18, 26, 27, 35 };
     private static final int[] BORDER_OUT = { 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 53 };
     private static final int[] INPUT_SLOTS = { 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34 };
@@ -98,8 +91,7 @@ public class ElectricGoldRefinery extends SlimefunItem implements EnergyNetCompo
 
             @Override
             public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block b) {
-                // open on the page of the selected recipe
-                showSelectionPage(menu, b, getSelectedRecipe(b) / SELECTION_SLOTS.length);
+                showRecipeButton(menu, b);
             }
 
             public boolean canOpen(@Nonnull Block b, @Nonnull Player p) {
@@ -174,71 +166,42 @@ public class ElectricGoldRefinery extends SlimefunItem implements EnergyNetCompo
         }
     }
 
-    private static int getPageCount() {
-        return (RECIPE_COUNT + SELECTION_SLOTS.length - 1) / SELECTION_SLOTS.length;
-    }
-
     /**
-     * Shows one page of the recipe selection and the page arrows.
+     * The button that switches the recipe: left click = next, right click = previous.
      */
-    private void showSelectionPage(@Nonnull BlockMenu menu, @Nonnull Block b, int page) {
-        int pages = getPageCount();
-        int current = Math.max(0, Math.min(page, pages - 1));
-        int selected = getSelectedRecipe(b);
-
-        for (int i = 0; i < SELECTION_SLOTS.length; i++) {
-            int slot = SELECTION_SLOTS[i];
-            int recipe = current * SELECTION_SLOTS.length + i;
-            if (recipe >= RECIPE_COUNT) {
-                menu.replaceExistingItem(slot, ChestMenuUtils.getBackground());
-                menu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
-                continue;
-            }
-            menu.replaceExistingItem(slot, getSelectionItem(recipe, recipe == selected));
-            menu.addMenuClickHandler(slot, (p, s, item, action) -> {
-                StorageCacheUtils.setData(b.getLocation(), "gold_recipe", Integer.toString(recipe));
-                showSelectionPage(menu, b, current);
-                return false;
-            });
-        }
-
-        menu.replaceExistingItem(PREVIOUS_PAGE_SLOT, new CustomItemStack(Material.ARROW, "&ePrevious page",
-                "", "&7Page " + (current + 1) + "/" + pages));
-        menu.addMenuClickHandler(PREVIOUS_PAGE_SLOT, (p, s, item, action) -> {
-            showSelectionPage(menu, b, current == 0 ? pages - 1 : current - 1);
-            return false;
-        });
-        menu.replaceExistingItem(NEXT_PAGE_SLOT, new CustomItemStack(Material.ARROW, "&eNext page",
-                "", "&7Page " + (current + 1) + "/" + pages));
-        menu.addMenuClickHandler(NEXT_PAGE_SLOT, (p, s, item, action) -> {
-            showSelectionPage(menu, b, current == pages - 1 ? 0 : current + 1);
+    private void showRecipeButton(@Nonnull BlockMenu menu, @Nonnull Block b) {
+        menu.replaceExistingItem(RECIPE_SLOT, getRecipeButton(getSelectedRecipe(b)));
+        menu.addMenuClickHandler(RECIPE_SLOT, (p, slot, item, action) -> {
+            int step = action.isRightClicked() ? RECIPE_COUNT - 1 : 1;
+            int next = (getSelectedRecipe(b) + step) % RECIPE_COUNT;
+            StorageCacheUtils.setData(b.getLocation(), "gold_recipe", Integer.toString(next));
+            showRecipeButton(menu, b);
             return false;
         });
     }
 
     @Nonnull
-    private static ItemStack getSelectionItem(int recipe, boolean selected) {
-        ItemStack item;
-        if (recipe == NONE_RECIPE) {
-            item = new CustomItemStack(Material.BARRIER, "&cNone", "", "&7Stops the machine");
-        } else {
-            item = new ItemStack(GOLDS[recipe]);
-        }
+    private static String getRecipeName(int recipe) {
+        return recipe == NONE_RECIPE ? "None" : "Gold " + (4 + recipe * 2) + " Carat";
+    }
 
-        ItemMeta meta = item.getItemMeta();
-        List<String> lore = meta.getLore() == null ? new ArrayList<>() : new ArrayList<>(meta.getLore());
+    /**
+     * Lists all the recipes, the selected one in green and the others in red.
+     */
+    @Nonnull
+    private static ItemStack getRecipeButton(int selected) {
+        List<String> lore = new ArrayList<>();
         lore.add("");
-        lore.add(ChatColor.translateAlternateColorCodes('&', selected ? "&a\u2714 Selected" : "&e> Click to select"));
-        meta.setLore(lore);
-        if (selected) {
-            meta.addEnchant(Enchantment.LUCK, 1, true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        for (int recipe = 0; recipe < RECIPE_COUNT; recipe++) {
+            lore.add(recipe == selected ? "&a\u25B6 " + getRecipeName(recipe) : "&c" + getRecipeName(recipe));
         }
-        // never stacks with real items
-        meta.getPersistentDataContainer().set(new NamespacedKey(FoxyMachines.getInstance(), "nonstackable"),
-                PersistentDataType.BYTE, (byte) 1);
-        item.setItemMeta(meta);
-        return item;
+        lore.add("");
+        lore.add("&eLeft click &7for the next recipe");
+        lore.add("&eRight click &7for the previous recipe");
+
+        Material material = selected == NONE_RECIPE ? Material.BARRIER : Material.GOLD_INGOT;
+        return new CustomItemStack(material, "&6Recipe: " + (selected == NONE_RECIPE ? "&c" : "&a") + getRecipeName(selected),
+                lore.toArray(new String[0]));
     }
 
     @Nonnull
@@ -447,16 +410,15 @@ public class ElectricGoldRefinery extends SlimefunItem implements EnergyNetCompo
 
     @Nonnull
     private static ItemStack getInputBorder() {
-        return new SlimefunItemStack("_UI_INPUT_SLOT", Material.CYAN_STAINED_GLASS_PANE, " ");
+        return new CustomItemStack(Material.CYAN_STAINED_GLASS_PANE, " ");
     }
 
     protected void constructMenu(@Nonnull BlockMenuPreset preset) {
-        // the selection row is filled when the menu is opened
-        preset.addItem(PREVIOUS_PAGE_SLOT, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
-        preset.addItem(NEXT_PAGE_SLOT, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
-        for (int i : SELECTION_SLOTS) {
+        for (int i : BACKGROUND) {
             preset.addItem(i, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
         }
+        // the recipe button is filled when the menu is opened
+        preset.addItem(RECIPE_SLOT, getRecipeButton(NONE_RECIPE), ChestMenuUtils.getEmptyClickHandler());
 
         for (int i : BORDER_IN) {
             preset.addItem(i, getInputBorder(), ChestMenuUtils.getEmptyClickHandler());
@@ -464,7 +426,7 @@ public class ElectricGoldRefinery extends SlimefunItem implements EnergyNetCompo
         preset.addItem(PROGRESS_SLOT, getInputBorder(), ChestMenuUtils.getEmptyClickHandler());
 
         for (int i : BORDER_OUT) {
-            preset.addItem(i, new SlimefunItemStack("_UI_OUTPUT_SLOT", Material.ORANGE_STAINED_GLASS_PANE, " "), ChestMenuUtils.getEmptyClickHandler());
+            preset.addItem(i, new CustomItemStack(Material.ORANGE_STAINED_GLASS_PANE, " "), ChestMenuUtils.getEmptyClickHandler());
         }
 
         for (int i : getOutputSlots()) {
